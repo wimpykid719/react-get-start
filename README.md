@@ -1,7 +1,7 @@
 # Reactチュートリアル
 今回のチュートリアルで実際に作成したOXゲーム
 
-![react-get-start](https://user-images.githubusercontent.com/23703281/112090943-ca1c1680-8bd7-11eb-9ed6-a20b74d07022.gif)
+![react-get-start](https://user-images.githubusercontent.com/23703281/112091747-64308e80-8bd9-11eb-8502-6026398ca7ec.gif)
 
 ## 最初に
 
