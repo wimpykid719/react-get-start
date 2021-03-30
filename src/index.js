@@ -34,7 +34,7 @@ function Square(props) {
       最初のonClickはbuttonの組み込みでpropsのonClickはBoardから渡されたもので
       クリックによって実行されるとBoardのhandleClickが実行される。それでStateの値を更新する。
     */
-    <button className="square" onClick={props.onClick}>
+    <button className={`square ${props.isHighlight ? 'highlight' : ''}`} onClick={props.onClick}>
       {props.value}
     </button>
   );
@@ -69,10 +69,13 @@ class Board extends React.Component {
   //     xIsNext: !this.state.xIsNext,
   //   });
   // }
-
-  renderSquare(i) {
+  
+  //ここの引数にisHighlightにthis.props.highlightCells.indexOf(i * 3 + j) !== -1の結果が受け取られる。
+  renderSquare(i, isHighlight = false) {
     return (
       <Square 
+        // 課題5で追加したpropsにして渡す。
+        isHighlight={isHighlight}
         /*
           iにはthis.renderSquare(0~8)の0~8が入る。
           その番号を使ってBoardに作成された。Stateにアクセスしてる。
@@ -90,6 +93,9 @@ class Board extends React.Component {
         // Gameからもらうようになるので変更する。
         // onClick={() => this.handleClick(i)}
         onClick={() => this.props.onClick(i)}
+        
+        //追加課題3
+        key={i}
       />
     );
   }
@@ -106,26 +112,50 @@ class Board extends React.Component {
     //   } else {
     //     status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
     //   }
+    // return (
+    //   <div>
+    //     <div className="board-row">
+    //       {this.renderSquare(0)}
+    //       {this.renderSquare(1)}
+    //       {this.renderSquare(2)}
+    //     </div>
+    //     <div className="board-row">
+    //       {this.renderSquare(3)}
+    //       {this.renderSquare(4)}
+    //       {this.renderSquare(5)}
+    //     </div>
+    //     <div className="board-row">
+    //       {this.renderSquare(6)}
+    //       {this.renderSquare(7)}
+    //       {this.renderSquare(8)}
+    //     </div>
+    //   </div>
+    // );
 
-    return (
+    //課題3ハードコーディングされていた上記を書き換える
+    return(
       <div>
-        <div className="board-row">
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
-        </div>
+        {
+          // 配列の中に0を3つで作成する。iはmapで現在の変数添字なので最初は1になる。
+          Array(3).fill(0).map((row, i) => {
+            return (
+              <div className="board-row" key={i}>
+                {
+                  Array(3).fill(0).map((col, j) => {
+                    return(
+                      // i+3+jで各0~9のSquare要素をレンダリングしている。後半は勝利した配列の中にレンダーする予定
+                      // の数値があればTrueを返す。
+                      this.renderSquare(i * 3 + j, this.props.highlightCells.indexOf(i * 3 + j) !== -1)
+                    )
+                  })
+                }
+              </div>
+            )
+          })
+        }
       </div>
     );
+
   }
 }
 
@@ -137,7 +167,8 @@ class Game extends React.Component {
         squares: Array(9).fill(null),
       }],
       stepNumber: 0,
-      xIsNext: true
+      xIsNext: true,
+      isAsc: true
     };
   }
 
@@ -172,6 +203,9 @@ class Game extends React.Component {
       */
       history: history.concat([{
         squares: squares,
+        //追加課題1
+        col: (i % 3) + 1, 
+        row: (i / 3 | 0) + 1,
       }]),
       stepNumber: history.length,
       xIsNext: !this.state.xIsNext,
@@ -185,25 +219,35 @@ class Game extends React.Component {
     });
   }
 
+  toggleAsc() {
+    this.setState({
+      isAsc: !this.state.isAsc,
+    });
+  }
+
   render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
-    const winner = calculateWinner(current.squares);
-    //第一引数は{suquare: ...}、第二引数に0,1,2と要素の添字が入る。
-    const moves = history.map((step, move) => {
-      const desc = move ? 'Go to move #' + move : 'Go to game start';
-      return (
-        <li key={move}>
-          <button onClick={() => this.jumpTo(move)}>{desc}</button>
-        </li>
-      );
-    });
+    const settlement = calculateWinner(current.squares);
+
     let status;
-    if (winner) {
-      status = 'Winner: ' + winner;
+    if (settlement) {
+      status = 'Winner: ' + settlement.winner;
     } else {
       status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
     }
+
+    //第一引数は{suquare: ...}、第二引数に0,1,2と要素の添字が入る。
+    const moves = history.map((step, move) => {
+      const desc = move ? 'Go to move #' + move + `（${step.col}, ${step.row}）`: 'Go to game start';
+      //追加課題2 moveだけだと打ったて全てがボールドになる。
+      return (
+        <li key={move}>
+          <button onClick={() => this.jumpTo(move)} className={this.state.stepNumber === move ? 'bold' : '' } >{desc}</button>
+        </li>
+      );
+    });
+    
 
     return (
       <div className="game">
@@ -211,11 +255,16 @@ class Game extends React.Component {
           <Board 
             squares={current.squares}
             onClick={i => this.handleClick(i)}
+            // lineには勝利したSquearの座標
+            highlightCells={settlement ? settlement.line : []}
           />
         </div>
         <div className="game-info">
           <div>{status}</div>
-          <ol>{moves}</ol>
+          <div>
+            <button onClick={() => this.toggleAsc()}>ASC⇔DESC</button>
+          </div>
+          <ol>{this.state.isAsc ? moves : moves.reverse()}</ol>
         </div>
       </div>
     );
@@ -242,10 +291,26 @@ function calculateWinner(squares) {
   ];
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i];
-    // 一番左側を起点に真ん中、左側を比較してマス目が揃っているか判断する。
+    // 一番左側を起点に真ん中、左側を比較してマス目が揃っているか判断する。a, b, cには座標(0~9)が入る。
+    // suquares[0]は'O'みたいな感じで格納されている。なのでそれが3つ揃えばゲーム終了
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
       // 揃っていたマス目の一つを返して勝利したプレーヤーを表示する。
-      return squares[a];
+      return {
+        // 課題6
+        isDraw: false,
+        // 課題5
+        winner: squares[a],
+        // 勝利した座標を格納する。
+        line: [a, b, c]
+      };
+    }
+  }
+  // 課題6 0
+  if (squares.filter((e) => !e).length === 0) {
+    return {
+      isDraw: true,
+      winner: null,
+      line: []
     }
   }
   return null;

@@ -49,3 +49,10 @@ body {
     margin-left: 20px;
   }
   
+  .bold {
+    font-weight: bold;
+  }
+
+  .highlight {
+    background-color: rgb(151, 255, 173);
+  }
