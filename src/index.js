@@ -232,7 +232,11 @@ class Game extends React.Component {
 
     let status;
     if (settlement) {
-      status = 'Winner: ' + settlement.winner;
+      if (settlement.isDraw) {
+        status = 'Draw';
+      } else {
+        status = 'Winner: ' + settlement.winner;
+      }
     } else {
       status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
     }
@@ -305,7 +309,8 @@ function calculateWinner(squares) {
       };
     }
   }
-  // 課題6 0
+  // 課題6 Suquares[0]で中身がnullのだけを配列に格納する。
+  // つまり配列が全て埋まっている場合は、空の配列になる。
   if (squares.filter((e) => !e).length === 0) {
     return {
       isDraw: true,
