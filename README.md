@@ -308,6 +308,14 @@ Keyを使って再描画の処理を最小限に止めることが出来る。
 
 するとReactでは兄弟要素全てが再描画の対象になり無駄にリソースを消費する。
 
+## 追記
+
+![ReactTutorialTasks](https://user-images.githubusercontent.com/23703281/113072795-da994600-9202-11eb-8f7d-fbf737348e1e.gif)
+
+チュートリアルにあった課題も終了させた。解説なしでは何も出来ないので下記のサイトにお世話になりました。Reactのチュートリアル課題を解説されているサイトは他にもありますが、一番コードがスマートだと思ったので参考にしました。
+
+[【入門】Reactチュートリアルをやりながら実践入門〜追加課題編〜](https://fukatsu.tech/react-tutorial-additional-challenges#1colrow)
+
 ### 参照
 
 [[React]setState実行時のrenderメソッドの動きを検証する - Qiita](https://qiita.com/ozaki25/items/b7cc9434e83b5e0fe59b)
